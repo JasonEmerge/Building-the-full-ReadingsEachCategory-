@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   COZALYZE · COMPLETE TROPICAL READING · T1.0 · one document
+   COZALYZE · COMPLETE TROPICAL READING · T1.1 · one document
    Paid dashboard + reveal + six reading sections in ONE document
    (standing rule: no iframe, no page navigation between them).
    Design tokens and structure follow the supplied spec verbatim.
@@ -25,7 +25,7 @@
   --body-font: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
   --side-pad: 28px;
   --dash-zoom: 1;            /* opens showing the whole art, then eases to --dash-zoom-in */
-  --dash-zoom-in: 1.12;   /* this art already nearly fills a phone; above ~1.08 the bottom nav leaves the screen */
+  --dash-zoom-in: 1.3;    /* same landing as the Vedic dashboard; the bottom nav pill sits below the screen at this zoom */
 }
 @media (max-width: 374px) { :root { --side-pad: 20px; } }
 
@@ -419,7 +419,7 @@ body.scroll-locked { overflow: hidden; touch-action: none; }
   <div class="vedic-reading-content" id="vedicContent"></div>
 </main>
 
-<div class="vedic-stamp" aria-hidden="true">TROPICAL READING · T1.0 · one document</div>
+<div class="vedic-stamp" aria-hidden="true">TROPICAL READING · T1.1 · one document</div>
 
 <script>
 /* ============================================================
