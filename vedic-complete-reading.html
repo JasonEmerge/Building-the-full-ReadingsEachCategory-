@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000f26">
+<title>Your Vedic Reading · CozAlyze</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   COZALYZE · COMPLETE VEDIC READING · R1.1
+   One reusable page component rendering six sections.
+   Design tokens and structure follow the supplied spec verbatim.
+   ============================================================ */
+:root {
+  --vedic-navy: #000f26;
+  --vedic-gold: #d4a178;
+  --vedic-gold-muted: rgba(212, 161, 120, 0.65);
+  --vedic-ivory: #e5d4c5;
+  --vedic-ivory-muted: rgba(229, 212, 197, 0.88);
+  --display-font: "Cormorant Garamond", Georgia, serif;
+  --body-font: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  --side-pad: 28px;
+}
+@media (max-width: 374px) { :root { --side-pad: 20px; } }
+
+* { box-sizing: border-box; }
+html { background: var(--vedic-navy); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--vedic-navy);
+  color: var(--vedic-ivory);
+  font-family: var(--body-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Fixed background layer: iOS ignores background-attachment on body,
+   so the image lives on its own fixed layer behind the scrolling content. */
+.vedic-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--vedic-navy);
+  background-image: url("vedic-moon-bg.png");
+  background-size: cover;
+  background-position: top center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.vedic-reading-page {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+  padding:
+    calc(env(safe-area-inset-top) + 24px)
+    var(--side-pad)
+    calc(env(safe-area-inset-bottom) + 24px);
+}
+
+.vedic-reading-content {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  animation: vedicFadeIn 240ms ease-out;
+}
+@keyframes vedicFadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vedic-reading-content { animation: none; }
+}
+
+/* ---------- header ---------- */
+.vedic-back-button {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 10px);
+  left: calc(var(--side-pad) - 10px);
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: var(--vedic-gold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.vedic-back-button svg { width: 30px; height: 20px; display: block; }
+.vedic-back-button:focus-visible { outline: 1px solid var(--vedic-gold-muted); outline-offset: 4px; border-radius: 4px; }
+
+.vedic-header {
+  text-align: center;
+  padding-top: 6px;
+}
+/* His logo lockup (emblem + CozAlyze wordmark) as one image, white keyed out.
+   Width is set so the wordmark reads at the spec's 28–30px display size. */
+.vedic-logo {
+  display: block;
+  width: 122px;
+  height: auto;
+  margin: 0 auto;
+}
+.vedic-eyebrow {
+  font-family: var(--body-font);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--vedic-ivory-muted);
+  margin: 12px 0 0;
+  padding-left: 0.32em; /* optical centre with the trailing tracking */
+}
+.vedic-counter {
+  font-family: var(--display-font);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--vedic-gold);
+  margin: 40px 0 0;
+}
+
+/* ---------- ornamental divider ---------- */
+.vedic-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: min(100%, 420px);
+  margin: 14px auto;
+  color: var(--vedic-gold);
+}
+.vedic-divider::before,
+.vedic-divider::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--vedic-gold-muted);
+}
+.vedic-divider svg { width: 16px; height: 16px; flex: 0 0 auto; display: block; }
+
+/* ---------- title ---------- */
+.vedic-title {
+  font-family: var(--display-font);
+  font-size: clamp(2.25rem, 10vw, 3rem);
+  font-weight: 500;
+  line-height: 0.98;
+  color: var(--vedic-gold);
+  text-align: center;
+  text-wrap: balance;
+  margin: 10px 0;
+}
+.vedic-title--long {
+  font-size: clamp(2.125rem, 9vw, 2.5rem);
+}
+
+/* ---------- body ---------- */
+.vedic-body {
+  font-family: var(--body-font);
+  font-size: clamp(1rem, 4.15vw, 1.0625rem);
+  line-height: 1.55;
+  font-weight: 400;
+  color: var(--vedic-ivory);
+  margin-top: 22px;
+}
+.vedic-body p { margin: 0 0 1.35em; }
+.vedic-body p:last-child { margin-bottom: 0; }
+
+/* ---------- bottom navigation ---------- */
+.vedic-nav { margin-top: 34px; }
+.vedic-nav-rule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--vedic-gold);
+}
+.vedic-nav-rule::before,
+.vedic-nav-rule::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--vedic-gold-muted);
+}
+.vedic-nav-rule svg { width: 14px; height: 14px; flex: 0 0 auto; display: block; }
+.vedic-nav-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding-top: 6px;
+}
+.vedic-nav a,
+.vedic-nav button {
+  font-family: var(--body-font);
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--vedic-gold);
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  text-align: left;
+}
+.vedic-nav a:focus-visible,
+.vedic-nav button:focus-visible { outline: 1px solid var(--vedic-gold-muted); outline-offset: 4px; border-radius: 4px; }
+.vedic-nav .vedic-nav-next { text-align: right; justify-content: flex-end; }
+.vedic-nav svg:not(.vedic-nav-rule svg) { width: 22px; height: 14px; flex: 0 0 auto; }
+
+/* ---------- build stamp (project standing rule) ---------- */
+.vedic-stamp {
+  position: fixed;
+  right: 8px;
+  bottom: calc(env(safe-area-inset-bottom) + 4px);
+  z-index: 2;
+  font: 9px/1 var(--body-font);
+  letter-spacing: 0.08em;
+  color: rgba(212, 161, 120, 0.35);
+  pointer-events: none;
+}
+</style>
+</head>
+<body>
+
+<div class="vedic-bg" aria-hidden="true"></div>
+
+<main class="vedic-reading-page" id="vedicPage">
+  <button class="vedic-back-button" id="vedicBack" type="button" aria-label="Back to your Vedic reading dashboard">
+    <svg viewBox="0 0 30 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M29 10H2M9 3 2 10l7 7"/>
+    </svg>
+  </button>
+  <div class="vedic-reading-content" id="vedicContent"></div>
+</main>
+
+<div class="vedic-stamp" aria-hidden="true">VEDIC READING · R1.1</div>
+
+<script>
+/* ============================================================
+   SECTION DATA (spec, verbatim)
+   ============================================================ */
+const vedicReadingSections = [
+  { id: "at-your-core",            number: 1, title: "At Your Core",              nextLabel: "Love, Desire & Creativity" },
+  { id: "love-desire-creativity",  number: 2, title: "Love, Desire & Creativity", nextLabel: "Work, Money & Expression" },
+  { id: "work-money-expression",   number: 3, title: "Work, Money & Expression",  nextLabel: "Wisdom, Purpose & Legacy" },
+  { id: "wisdom-purpose-legacy",   number: 4, title: "Wisdom, Purpose & Legacy",  nextLabel: "Challenges & Resilience" },
+  { id: "challenges-resilience",   number: 5, title: "Challenges & Resilience",   nextLabel: "Your Essential Takeaway" },
+  { id: "essential-takeaway",      number: 6, title: "Your Essential Takeaway",   nextLabel: null }
+];
+const SECTION_TOTAL = String(vedicReadingSections.length).padStart(2, "0");
+
+/* ============================================================
+   READING SOURCE
+   The engine supplies window.COZ_VEDIC_READING before this script runs
+   (or stores it in localStorage "cozVedicReading") as
+     { "<section id>": ["paragraph", "paragraph", ...], ... }
+   Nothing below is shown to the reader except the paragraphs.
+   The FIXTURE is synthetic placeholder prose for design verification
+   only. It is not the screenshot sample and it is not a real reading.
+   ============================================================ */
+const COZ_VEDIC_READING_FIXTURE = {
+  "at-your-core": [
+    "At the centre of your chart there may be a steadiness that others notice before you do. Several factors point the same way, suggesting a temperament that prefers to understand a situation before responding to it. You may take in more than you say, and the pause between feeling and speaking can be where your clearest thinking happens.",
+    "Your emotional life may run on a longer rhythm than the people around you expect. There can be a tendency to hold impressions for a while, to turn them over privately, and to arrive at a settled view only after the moment has passed. This may look like reserve from the outside, while from the inside it can feel like care.",
+    "Identity, for you, may be less about how you appear and more about whether what you do matches what you believe. When those two align there is often a quiet confidence available to you. When they drift apart, restlessness can follow, and that restlessness may be a useful signal rather than a fault.",
+    "The central motivation the chart keeps returning to is a wish to make something that lasts. This can express itself through work, through relationships, or through the way you keep your own counsel. How strongly it shows may depend on the broader chart and on the circumstances you find yourself in."
+  ],
+  "love-desire-creativity": [
+    "In closeness you may look for depth before ease. Two placements in particular suggest that you can be slow to open and loyal once you have, and that you may value being understood more than being admired. Partners who mistake your patience for indifference can miss what is actually going on.",
+    "Desire in your chart may carry an intensity that is not always visible on the surface. There can be a pull toward experiences that feel meaningful rather than merely pleasant, and a corresponding impatience with anything that feels performed. This may make you selective, and selectivity here can serve you well.",
+    "There is a potential for relationships to become a place of learning as much as comfort. Some patterns suggest that the people you draw close may mirror parts of yourself you are still working out, which can be demanding at times and clarifying over the longer run.",
+    "Creativity may be one of the more natural outlets for all of this. Whether it takes the form of making, arranging, or simply noticing, the chart indicates a greater likelihood that you feel most yourself when something is being brought into form. How this manifests may depend on what the rest of your life leaves room for."
+  ],
+  "work-money-expression": [
+    "Your working style may lean toward thoroughness over speed. A cluster of factors suggests that you can be trusted with things that need to be done properly, and that you may find repetitive or superficial work draining in a way that surprises people who see only your reliability.",
+    "Contribution, for you, may matter more than title. There can be a tendency to measure your effort by whether it made a real difference, and to feel flat when it did not, regardless of how it was received. Roles that let you see the effect of your work may suit you better than roles that reward visibility alone.",
+    "With resources there may be a mixed picture. One current suggests caution and a preference for security, while another suggests generosity that can run ahead of the plan. Neither is a problem in itself, and the chart indicates that steadiness tends to come when the two are consciously balanced rather than left to compete.",
+    "Communication may be an area of gradual growth. You may express yourself more fully in writing or one to one than in a crowd, and there may be times when what you meant and what was heard do not quite match. Over time this can become a strength, since care with words often reads as sincerity.",
+    "Personal expression, taken as a whole, may rely on trust. When you feel secure in a setting there can be far more of you available to it. Building that security deliberately, rather than waiting for it, may be one of the more practical things this part of the chart suggests."
+  ],
+  "wisdom-purpose-legacy": [
+    "Beliefs in your chart may be something you arrive at rather than inherit. Several factors point toward a mind that tests ideas against experience and keeps what holds. This can make you slow to adopt a view and slower still to abandon one, which may frustrate others while it protects you.",
+    "Learning may happen best for you when it has a purpose attached. Abstract study for its own sake can lose you, while the same material tied to a real question may hold your attention for years. There is potential here for depth in a few areas rather than breadth across many.",
+    "Meaning may come from being useful in a way that is specific to you. The chart suggests that guiding, repairing, or clarifying things for others could feel more like purpose than achievement does. When your work touches this, effort may not feel like effort.",
+    "Legacy, if the word applies, may be quieter than the word suggests. The pattern indicates a potential to be remembered less for a single thing than for a consistency that people came to rely on. Whether that consistency becomes visible to others may depend on how willing you are to let it be seen."
+  ],
+  "challenges-resilience": [
+    "The chart suggests that pressure, for you, may arrive as accumulation rather than crisis. Small obligations can build until they feel heavier than any one of them deserves, and there may be a tendency to carry them alone past the point where asking would have helped.",
+    "One recurring tension may sit between what you expect of yourself and what circumstances allow. There can be periods when progress feels slower than your standard, and the risk in those periods is not failure but self-criticism. Recognising the pattern may take some of its force away.",
+    "Support in your chart tends to come through structure. Routines, trusted people, and clear commitments may steady you more than encouragement does. When things are difficult, the factors that help may be the ones that reduce ambiguity rather than the ones that raise morale.",
+    "Resilience here may look like persistence rather than bounce. You may not recover quickly, but you may recover completely, and the chart indicates a greater likelihood that difficult periods leave you with something usable. How this manifests may depend on the broader chart and your circumstances."
+  ],
+  "essential-takeaway": [
+    "Taken together, the strongest theme in your chart may be the relationship between depth and patience. The same factors that make you slow to open, slow to decide, and slow to give up appear in nearly every area, and they may be one trait seen from different angles rather than several traits at once.",
+    "Where the reading seemed to contradict itself, in resources, in expression, in how you handle pressure, the contradiction may resolve into a single question of trust. When you feel secure, more of you becomes available. When you do not, you tend to hold back and carry more than you need to.",
+    "Your natural strengths may include reliability, discernment, and a capacity to make things that last. Your likely growth areas may include asking earlier, speaking sooner, and letting your consistency be seen. None of these are fixed outcomes, and the chart describes tendencies rather than guarantees.",
+    "If there is a central message, it may be this: the steadiness you offer others is also available to you. Building the conditions that let you trust a situation, rather than waiting for them to appear, may be the most practical use of what this chart suggests."
+  ]
+};
+
+function loadReading() {
+  if (window.COZ_VEDIC_READING && typeof window.COZ_VEDIC_READING === "object") return window.COZ_VEDIC_READING;
+  try {
+    const stored = localStorage.getItem("cozVedicReading");
+    if (stored) { const parsed = JSON.parse(stored); if (parsed && typeof parsed === "object") return parsed; }
+  } catch (e) {}
+  return COZ_VEDIC_READING_FIXTURE;
+}
+
+/* ============================================================
+   NAVIGATION TARGETS
+   ?back=<url> overrides where the dashboard lives (default vedic-reading.html)
+   ============================================================ */
+const params = new URLSearchParams(location.search);
+const DASHBOARD_HREF = params.get("back") || "vedic-reading.html";
+
+function goDashboard() { location.href = DASHBOARD_HREF; }
+
+function finishReading() {
+  try { localStorage.setItem("cozVedicReadingComplete", new Date().toISOString()); } catch (e) {}
+  try { window.dispatchEvent(new CustomEvent("COZ_VEDIC_READING_COMPLETE")); } catch (e) {}
+  goDashboard();
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+const STAR_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0 13.6 10.4 24 12 13.6 13.6 12 24 10.4 13.6 0 12 10.4 10.4Z"/></svg>';
+const ARROW_L = '<svg viewBox="0 0 22 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 7H2M7 2 2 7l5 5"/></svg>';
+const ARROW_R = '<svg viewBox="0 0 22 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 7h19M15 2l5 5-5 5"/></svg>';
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+function sectionById(id) { return vedicReadingSections.find(s => s.id === id) || vedicReadingSections[0]; }
+
+function renderSection(section) {
+  const reading = loadReading();
+  const paragraphs = Array.isArray(reading[section.id]) ? reading[section.id] : [];
+  const sectionCounter = `${String(section.number).padStart(2, "0")} OF ${SECTION_TOTAL}`;
+  const titleClass = section.title.length > 22 ? "vedic-title vedic-title--long" : "vedic-title";
+  const next = section.nextLabel ? vedicReadingSections[section.number] : null;
+
+  const nextControl = next
+    ? `<a class="vedic-nav-next" href="#/${next.id}" data-next="${next.id}">Next: ${esc(section.nextLabel)} ${ARROW_R}</a>`
+    : `<button class="vedic-nav-next" type="button" id="vedicFinish">Finish Reading ${ARROW_R}</button>`;
+
+  const html = `
+    <header class="vedic-header">
+      <img class="vedic-logo" src="vedic-logo.png" alt="CozAlyze" width="1000" height="1055">
+      <p class="vedic-eyebrow">Your Vedic Reading</p>
+      <p class="vedic-counter">${sectionCounter}</p>
+    </header>
+    <div class="vedic-divider" aria-hidden="true">${STAR_SVG}</div>
+    <h1 class="${titleClass}">${esc(section.title)}</h1>
+    <div class="vedic-divider" aria-hidden="true">${STAR_SVG}</div>
+    <section class="vedic-body">
+      ${paragraphs.map(p => `<p>${esc(p)}</p>`).join("")}
+    </section>
+    <nav class="vedic-nav" aria-label="Reading navigation">
+      <div class="vedic-nav-rule" aria-hidden="true">${STAR_SVG}</div>
+      <div class="vedic-nav-links">
+        <a href="${esc(DASHBOARD_HREF)}" id="vedicNavBack">${ARROW_L} Back to Your Reading</a>
+        ${nextControl}
+      </div>
+    </nav>`;
+
+  const old = document.getElementById("vedicContent");
+  const fresh = old.cloneNode(false);      // fresh node so the fade re-runs on every section
+  fresh.innerHTML = html;
+  old.replaceWith(fresh);
+
+  document.title = `${section.title} · Your Vedic Reading · CozAlyze`;
+
+  const finish = document.getElementById("vedicFinish");
+  if (finish) finish.addEventListener("click", finishReading);
+}
+
+/* ============================================================
+   HISTORY / ROUTING  (#/<section id>)
+   ============================================================ */
+function idFromHash() {
+  const m = location.hash.match(/^#\/?([a-z0-9-]+)/i);
+  return m ? m[1] : null;
+}
+
+function showFromHash() {
+  const id = idFromHash();
+  const section = sectionById(id);
+  if (!id || id !== section.id) {
+    history.replaceState({ id: section.id }, "", `#/${section.id}`);
+  }
+  renderSection(section);
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
+
+document.getElementById("vedicBack").addEventListener("click", goDashboard);
+
+/* Next links are plain hash links: every section is its own history entry,
+   so the browser back button steps through sections normally. */
+window.addEventListener("hashchange", showFromHash);
+showFromHash();
+</script>
+</body>
+</html>
