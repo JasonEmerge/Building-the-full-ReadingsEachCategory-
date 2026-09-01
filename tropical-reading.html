@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   COZALYZE · COMPLETE TROPICAL READING · T1.1 · one document
+   COZALYZE · COMPLETE TROPICAL READING · T1.2 · one document
    Paid dashboard + reveal + six reading sections in ONE document
    (standing rule: no iframe, no page navigation between them).
    Design tokens and structure follow the supplied spec verbatim.
@@ -419,7 +419,7 @@ body.scroll-locked { overflow: hidden; touch-action: none; }
   <div class="vedic-reading-content" id="vedicContent"></div>
 </main>
 
-<div class="vedic-stamp" aria-hidden="true">TROPICAL READING · T1.1 · one document</div>
+<div class="vedic-stamp" aria-hidden="true">TROPICAL READING · T1.2 · one document</div>
 
 <script>
 /* ============================================================
@@ -437,60 +437,175 @@ const SECTION_TOTAL = String(vedicReadingSections.length).padStart(2, "0");
 
 /* ============================================================
    READING SOURCE
-   The engine supplies window.COZ_TROPICAL_READING before this script runs
-   (or stores it in localStorage "cozTropicalReading") as
-     { "<section id>": ["paragraph", "paragraph", ...], ... }
-   Nothing below is shown to the reader except the paragraphs.
-   The FIXTURE is synthetic placeholder prose for design verification
-   only, written in the tropical (outer-expression) register. It is not a
-   real reading and it is not the Vedic fixture reworded.
+   The server-side generator supplies the reading in the spec's JSON
+   contract ({ system, title, subtitle, sections:[{id, number, title,
+   body[], sourceFactors[]}] }) as window.COZ_TROPICAL_READING or stored
+   in localStorage "cozTropicalReading". A flat { "<section id>": [...] }
+   shape is also accepted. sourceFactors are never rendered.
+   Anything carrying fixture: true is refused as customer content.
    ============================================================ */
-const COZ_TROPICAL_READING_FIXTURE = {
-  "at-your-core": [
-    "The first thing people tend to notice about you may not be the thing you consider most true. Several factors in your chart point toward an outward manner that reads as composed and direct, while the emotional layer underneath moves on its own schedule. That gap is not a contradiction so much as a rhythm, and much of your personality may be shaped by how you manage it.",
-    "You are likely to engage with the world through action and evidence rather than theory. When something matters, you tend to test it, and you may have little patience for situations that ask you to wait without a reason. This can make you effective and, at times, quicker to move than the people around you are ready for.",
-    "Emotionally, the chart suggests a need for privacy that sits alongside a public confidence. You may share opinions easily and feelings slowly, and the people who know both sides of you are probably few. That selectivity can protect you, and it can also leave others reading only the surface.",
-    "You may feel most like yourself when your actions and your standards line up, when what you are doing is something you would defend out loud. The conditions that suit you tend to be ones with room to move, clear stakes, and people who say what they mean."
-  ],
-  "love-desire-creativity": [
-    "In attraction you may respond first to candour. The chart points toward a pull to people who are direct about what they want, and a corresponding impatience with games, even when you are the one playing them. Desire here tends to arrive fast and clear, and it can cool just as quickly if it meets pretence.",
-    "Your emotional needs may be steadier than your romantic style suggests. Under the quick start there is a wish for reliability, for a partner who stays consistent when the initial charge has settled. Some of the friction in your relationships may come from the distance between those two speeds.",
-    "Affection, for you, is likely to be shown rather than described. Doing something for a person, defending them, making room for them in your plans, may come more naturally than talking about feeling. Partners who need the words can experience this as distance when it is meant as devotion.",
-    "Creativity tends to run on the same current as desire. You may make your best work when there is heat behind it, a challenge, a deadline, a person to impress or a point to prove. Play and pleasure can be part of your seriousness rather than a break from it."
-  ],
-  "work-money-expression": [
-    "Your working style may lean toward decisiveness and visible results. The chart suggests you are likely to be trusted with things that need to move, and to find slow consensus draining. You tend to communicate in short, clear lines, and people may come to you when they want an answer rather than a discussion.",
-    "Ambition here is probably real but selective. You may not want every promotion, only the ones that come with genuine authority over your own work. Titles matter less than latitude. Environments that reward initiative and tolerate a certain bluntness tend to bring out your best.",
-    "With money there may be a pattern of confident spending on what you believe in and caution about everything else. Security matters to you more than it might appear, and a stable base may be what lets you take the risks you are drawn to elsewhere.",
-    "Public identity and private motivation may not fully match. Others could see drive and competence; you may be more aware of the effort behind it. Over time your expression tends to become more economical, saying less and landing more, and that may be where your professional voice settles."
-  ],
-  "wisdom-purpose-legacy": [
-    "Meaning, in your chart, is likely to be built from experience rather than received. You tend to trust what you have tested, and beliefs that survive contact with real life become durable convictions. This can make you slow to adopt a philosophy and steady once you have.",
-    "The developmental direction the chart points toward is one of widening. Familiar patterns favour self-reliance and quick judgement. Growth may lie in letting other people's perspectives change your mind before you have decided, and in valuing what you cannot control alone.",
-    "You may influence others more by example than by instruction. People are likely to watch how you handle pressure and take their cue from that. The legacy this suggests is less a body of ideas than a way of standing, a demonstration that directness and care can coexist.",
-    "Long-term maturation may show up as a softening of the edges without loss of force. The chart suggests that what you are learning to cultivate is patience with process, so that the results you value can outlast the moment they were won."
-  ],
-  "challenges-resilience": [
-    "The recurring pressure in your chart may be impatience turned inward. Standards that make you effective can make waiting feel like failure, and periods where progress is slow may be harder on you than any setback. The risk is not giving up; it is pushing when the situation calls for holding still.",
-    "A second tension sits between independence and connection. You may be inclined to handle difficulty alone and to see asking for help as a cost, which can leave the people closest to you outside the very moments that would let them in.",
-    "When strengths run hot they can tip over. Directness can become abruptness, decisiveness can become a refusal to revisit a call, and confidence can read as not listening. Knowing which of these you reach for under stress may be half the work.",
-    "Your resilience is likely to be active rather than passive. You tend to recover by doing, by setting the next task and moving toward it, and that instinct is sound as long as it leaves some room for feeling the thing before you fix it. Supportive factors in the chart point toward physical outlets and trusted, plain-spoken company as the most reliable steadiers."
-  ],
-  "essential-takeaway": [
-    "Across the whole chart the same shape keeps appearing: a fast, direct outer self and a slower, more private inner one. Nearly every theme in this reading, in love, in work, in how you handle pressure, may be one expression of the distance between those two speeds.",
-    "The central tension is between acting and waiting. Your strengths live on the acting side, and the potential the chart points toward lives in learning when the waiting is the braver move. That is not a change of character; it is the same character with a wider range.",
-    "Your natural strengths may include clarity, courage in the moment, loyalty shown through action, and the ability to make things happen. Your likely growth areas may include letting people in before you have solved the problem, and trusting slow processes to finish.",
-    "If there is one thing to carry from this, it may be that your directness is not the obstacle to closeness that it sometimes feels like. Paired with a little more patience, it may be exactly what lets people trust you."
+/* ============================================================
+   >>> SAMPLE / FIXTURE CONTENT. NOT A CUSTOMER READING. <<<
+   This is a full-length sample written to the Tropical generator
+   specification so page length, scrolling, typography and navigation
+   can be tested at real size. It is written to a HYPOTHETICAL chart
+   (described in sourceFactors) and must never be shown as, stored as,
+   or mistaken for a personalized reading. It is used only when no
+   generated reading is present, and loadReading() refuses any stored
+   object that carries fixture: true.
+   ============================================================ */
+const COZ_TROPICAL_SAMPLE_READING = {
+  fixture: true,
+  sample: true,
+  customer: null,
+  system: "tropical",
+  title: "Your Tropical Reading",
+  subtitle: "Your Outer Expression",
+  sections: [
+    {
+      id: "at-your-core",
+      number: 1,
+      title: "At Your Core",
+      sourceFactors: [
+        "SAMPLE CHART (hypothetical): Leo Ascendant, chart ruler Sun",
+        "Sun Capricorn 6th conjunct Saturn Capricorn 6th",
+        "Moon Aries 9th square Sun and Saturn",
+        "Mercury, Uranus, Neptune in Capricorn 6th (earth emphasis)",
+        "Cardinal modality dominant; earth then fire by element",
+        "Jupiter Cancer 12th opposing Sun; Pluto Scorpio 4th near the IC"
+      ],
+      body: [
+        "The first thing people tend to meet in you is warmth with a spine in it. The way you carry yourself points toward presence, a readiness to be seen, an instinct to take up the room you are in rather than apologise for it. Yet the chart suggests that the engine underneath that presence runs on something cooler and more exacting. You may look like someone who leads with confidence while privately measuring yourself against a standard that rarely lets you rest.",
+        "That combination is the shape of your personality more than any single trait. The outward manner is generous and a little theatrical, quick to encourage and quick to take charge. The inner life is disciplined, task focused, and more anxious about getting it right than anyone watching would guess. When the two line up you can be formidable, a person who makes a promise in public and then quietly does the work to keep it. When they fall out of step you may feel like a performer who has forgotten why the show matters.",
+        "Emotionally, the chart points toward a temperament that is faster and hotter than the face you present. Feelings tend to arrive as sudden certainty, an impulse to act now, to say the thing, to fix it or leave. Because the rest of the chart prizes control and competence, you may have learned to sit on that heat, and the sitting can cost you. Irritability, restlessness and a sense of being held back are likely to be the signs that something has gone unspoken for too long.",
+        "There is a real contradiction here and it is worth naming plainly. Part of you wants to be recognised, to shine, to be the person others turn toward. Another part distrusts recognition that has not been earned, and can undercut your own moment by finding the flaw in it. You may be your own harshest reviewer, and the review often arrives while the applause is still going.",
+        "What makes you recognisable is the pairing of loyalty and standards. People are likely to experience you as someone who shows up, who remembers, who takes responsibility when it would be easier not to. They may also experience you as hard to please, not because you demand much of them, but because they can feel how much you demand of yourself and wonder whether they measure up.",
+        "You are likely to feel most authentic when the work in front of you is difficult enough to deserve your effort and visible enough to matter to someone. Praise for easy things may leave you cold. Respect for hard things done well tends to land. The conditions that suit you are ones where competence and warmth are both wanted, where you can be the steady one and the bright one at once, and where nobody asks you to choose between them."
+      ]
+    },
+    {
+      id: "love-desire-creativity",
+      number: 2,
+      title: "Love, Desire & Creativity",
+      sourceFactors: [
+        "Venus Sagittarius 5th trine Moon Aries 9th",
+        "Mars Virgo 2nd square Venus, trine Sun and Saturn",
+        "Moon Aries 9th square Saturn",
+        "7th house Aquarius, ruler Saturn in the 6th; Descendant Aquarius with North Node",
+        "8th house Pisces, ruler Jupiter in the 12th; Pluto Scorpio 4th",
+        "Pattern: fire in the houses of pleasure and the Moon, earth in the houses of work"
+      ],
+      body: [
+        "In love you may want two things that do not always agree: freedom and proof. The chart points toward a heart that is drawn to openness, adventure and a partner who is genuinely interesting, someone with opinions, plans and a life of their own. At the same time a more careful part of you watches for evidence, for reliability, for the small practical signs that a person means what they say. Attraction tends to start fast and then submit itself to inspection.",
+        "Desire here is warm, candid and a little idealistic. You are likely to fall for a mind as much as a body, and to find flirtation most enjoyable when it feels like a conversation you both want to continue. Pleasure and play matter to you, and you may be at your most charming when you are not trying, when a shared joke or a shared enthusiasm does the work that strategy never could.",
+        "The complication sits in how affection gets expressed. One part of the chart shows love through doing: fixing, organising, noticing what is needed and providing it before it is asked for. Another part wants love to feel like an adventure and can experience all that helpfulness as slightly deflating. You may swing between being the practical partner and wishing someone would sweep you off your feet, and a partner can be forgiven for not knowing which version they will meet.",
+        "Emotional needs, underneath, are direct. You want honesty, you want to be met with energy rather than caution, and you want disagreements to be had out loud and then finished. Sulking and slow freezes are likely to distress you more than a plain argument. What may take longer to admit is a need for reassurance, because asking for it feels like weakness to the part of you that prizes self-sufficiency.",
+        "Vulnerability tends to arrive through the body and through time. Physical closeness may open you when talking cannot, and long shared history tends to soften the inspecting eye. The chart suggests that intimacy deepens for you in private, away from the performance, and that you may guard that private self more fiercely than people expect from someone so outwardly open.",
+        "The relationship pattern to watch is criticism disguised as care. Your standards can turn on a partner as easily as on yourself, and helpful correction, offered often enough, can wear the shine off attraction. What is likely to support closeness is the reverse move: letting a partner do something their way, badly, and loving them anyway.",
+        "Creatively, you may make your best work in bursts of enthusiasm followed by long stretches of refinement. The spark is quick and the finishing is slow, and both are yours. Projects that let you enjoy the making, that have an audience in mind and a standard to meet, are likely to hold your attention longest. Play is not a break from your seriousness; it may be the door into it."
+      ]
+    },
+    {
+      id: "work-money-expression",
+      number: 3,
+      title: "Work, Money & Expression",
+      sourceFactors: [
+        "Mercury Capricorn 6th conjunct Uranus and Neptune",
+        "Sun and Saturn in the 6th; 6th house ruler Saturn in its own sign",
+        "Midheaven Taurus, ruler Venus in Sagittarius 5th",
+        "2nd house Virgo with Mars; 2nd ruler Mercury in the 6th",
+        "Jupiter Cancer 12th opposing Sun and Saturn",
+        "Pattern: identity, mind and discipline all concentrated in the house of work"
+      ],
+      body: [
+        "Work is not a compartment for you; the chart suggests it is where a large part of your identity actually lives. Your sense of self, your discipline and your way of thinking all gather in the same area of the chart, which points toward a person who is most fully themselves when they are being useful and good at something. The risk in that concentration is obvious: a bad month at work can feel like a bad month as a human being.",
+        "Your communication style is likely to be structured, economical and a little dry. You tend to think in systems and say what needs saying without decoration, and colleagues may come to you when they want a plan rather than a pep talk. There is a stranger, more original current underneath the practicality, a taste for unusual ideas and elegant solutions, and when you let it show your voice becomes far more distinctive than the careful version.",
+        "Skills tend to cluster around improvement. You may be the person who sees how a process could be better, who notices the inefficiency nobody else minds, who cannot leave a rough edge alone. That instinct is a genuine talent and a genuine liability. It makes you valuable and it can make you exhausting, to others and to yourself, when nothing is ever finished enough.",
+        "Your relationship with money is likely to be more anxious than your income would justify. Earning may come through diligence rather than luck, through being reliably competent over long periods, and security tends to matter to you at a level below reason. You may spend confidently on what you believe in and then lie awake over small sums. A stable base is not a luxury for you; it may be what allows the more adventurous parts of the chart to breathe at all.",
+        "Publicly, the chart points toward a professional identity built on steadiness and taste. People are likely to trust you with things that need to last. The Midheaven suggests that what you want to be known for is quality rather than speed, and that you may be quietly proud of work that nobody but you knows the effort behind.",
+        "The tension worth naming is between security, fulfilment and recognition. The part of you that wants a safe and orderly career, the part that wants work to feel like play, and the part that wants to be seen doing it are not always the same job. You may spend years serving one at the expense of the others before finding a role, or a way of working, where at least two of them can coexist.",
+        "Environments that suit you tend to combine high standards with genuine autonomy. Micromanagement is likely to make you rigid; total freedom without structure may make you scattered. Where you can set the standard yourself and be left to meet it, with people who respect craft and are not frightened of a blunt sentence, you are likely to do your most durable work."
+      ]
+    },
+    {
+      id: "wisdom-purpose-legacy",
+      number: 4,
+      title: "Wisdom, Purpose & Legacy",
+      sourceFactors: [
+        "Jupiter Cancer 12th opposing Sun and Saturn",
+        "Moon Aries in the 9th, ruler Mars in the 2nd",
+        "Saturn Capricorn in dignity in the 6th",
+        "North Node Aquarius 7th, South Node Leo 1st on the Ascendant",
+        "Midheaven Taurus; 11th house Gemini ruled by Mercury in the 6th",
+        "Pattern: self-reliance on the Ascendant side, collaboration on the growth side"
+      ],
+      body: [
+        "Meaning, for you, is likely to be something you fight for rather than inherit. The chart places your restless, questioning instincts in the area of belief and learning, which points toward a person who tests ideas hard, argues with them, and keeps only what survives. You may be impatient with received wisdom and drawn to teachers who can hold their ground, and you tend to learn best when something is at stake.",
+        "Faith, in the broad sense, may be a private matter. There is a strong suggestion that your most expansive feelings, the ones about hope, grace and being part of something larger, live in a hidden part of the chart, away from the public competence. You may be more spiritual, more sentimental or more moved by beauty than anyone at work would believe, and you may keep it that way on purpose.",
+        "Long-term maturation in this chart runs through discipline into softness. The strictness that serves you so well in work is likely to be the thing that, over decades, teaches you what it cannot do. Experiences that expand your perspective may be the ones where control fails and something better happens anyway: a loss that opens a door, a plan that collapses into a life you like more.",
+        "The developmental direction the chart points toward is collaboration. Your familiar pattern favours the self-reliant lead, the one who does it themselves and does it well. Growth, as this chart describes it, may lie in the other direction, toward partnership, toward groups, toward letting other people's ideas change the outcome. This is a direction, not a destiny. You are not being told to stop leading, only to notice how much more reaches you when you do not have to.",
+        "Knowledge, for you, tends to be practical before it is philosophical. You may collect ideas the way other people collect tools, for what they can do, and be quietly suspicious of any belief that cannot be used. Over time the chart suggests the reverse also becomes true: the things you have done well may start to teach you what you actually believe, and a philosophy assembled from experience tends to hold better than one adopted whole.",
+        "You are likely to influence others through standards and example rather than persuasion. People watch how you work and how you handle pressure and quietly raise their own bar. The legacy this suggests is less a monument than a method: a way of doing things properly that outlasts you in the people who learned it beside you.",
+        "What you may be learning to cultivate is trust in process, and specifically in processes you do not personally control. The chart gives you every tool for the solo effort. The contribution it points toward is the one that only becomes possible when your competence makes room for other people's, and when being right matters a little less to you than being in it together."
+      ]
+    },
+    {
+      id: "challenges-resilience",
+      number: 5,
+      title: "Challenges & Resilience",
+      sourceFactors: [
+        "Sun conjunct Saturn, both square Moon Aries",
+        "Mars Virgo 2nd square Venus Sagittarius 5th",
+        "Pluto Scorpio 4th near the IC, square Ascendant and Descendant",
+        "Jupiter 12th opposing the Sun and Saturn conjunction",
+        "6th house stellium; 8th ruler Jupiter in the 12th",
+        "Supports: Mars trine Sun and Saturn; Venus trine Moon"
+      ],
+      body: [
+        "The recurring pressure in your chart is the argument between what you feel and what you allow yourself to do about it. The emotional nature is fast and combative; the identity is disciplined and self-critical; the two sit at odds. In practice this may show up as a habit of suppressing your first reaction, then resenting the suppression, then acting on the resentment sideways, in irritability, in overwork, in a sharpness that surprises you.",
+        "A second pattern lives at the foundation of the chart, in the area of home and origins. Something there may run deep and intense, a family atmosphere or an early experience of power and secrecy that taught you to keep your own counsel. You may guard your private life with unusual force and find it hard to let anyone see the room where you actually live. This is not a flaw. It is a defence that once made sense and may now cost more than it protects.",
+        "Frustration tends to gather around control. When plans are disrupted, when someone else's carelessness undoes your careful work, when a situation asks you to wait without a timeline, the strain is likely to be disproportionate. You may experience delay as a personal insult and respond by tightening your grip, which tends to make the delay feel longer.",
+        "Your strengths are the kind that become excessive under pressure. Discipline hardens into rigidity, high standards into contempt, self-reliance into isolation, candour into cruelty. The chart is not suggesting you are cruel; it is suggesting that the same gifts, under enough load, have those shadows, and that knowing which one you reach for first is worth more than any resolution to be better.",
+        "Coping, for you, is likely to be active. When things go wrong you do something, you clean, you plan, you work later, you fix a thing that was not the thing. That instinct is sound as far as it goes. The part that may need attention is the feeling underneath the fixing, which tends to wait patiently until you stop moving and then arrive all at once.",
+        "Resilience in this chart is real and specific. There is a steady, practical strength that can outlast almost anything, a capacity to keep functioning when others fold, and a physical vitality that responds well to being used. Movement, exercise and tangible tasks are likely to regulate you better than talk. So is honest company, people who tend to tell you the truth without dressing it and who do not need you to be fine.",
+        "The constructive move the chart points toward is letting the heat out earlier. Saying the small true thing before it becomes the large resentful one. Asking for the reassurance before the argument. Letting someone see the private room while it is still tidy. None of this comes naturally to a chart built for control, which may be exactly why it helps."
+      ]
+    },
+    {
+      id: "essential-takeaway",
+      number: 6,
+      title: "Your Essential Takeaway",
+      sourceFactors: [
+        "Synthesis only. Repeating patterns: warmth over exacting standards; fast feeling against disciplined action; self-reliance against a growth direction of partnership"
+      ],
+      body: [
+        "Three patterns run through every part of this reading. The first is a warm, visible outer self carried by a cool, exacting inner one. The second is feeling that moves faster than you let it, and the friction that builds when it waits. The third is a chart built for self-reliance whose growth, again and again, points toward other people.",
+        "The central tension is between control and contact. Your gifts sit on the control side: discipline, standards, competence, the ability to hold things together and make them last. The potential the chart describes sits on the contact side: being met, being helped, being changed by someone else's way of doing things. Neither side is wrong. You have simply spent longer on one of them.",
+        "Your strengths are likely to include loyalty, craft, courage in the moment, and a presence people trust before they can say why. Your growth areas are likely to include letting the first feeling be spoken, letting a task be done imperfectly by someone else, and letting the private self be seen before it is perfect. None of these are verdicts. They describe where the chart's energy pools and where it may be asking to move.",
+        "If there is one thing to carry from this, it is that your standards may not be the problem they sometimes feel like. Turned inward alone they become a cage; turned toward the world and shared, they become the thing people are grateful to have stood beside. The work is not to lower them. It is to stop being the only one allowed inside them."
+      ]
+    }
   ]
 };
 
+function readingFromContract(obj) {
+  if (!obj || typeof obj !== "object") return null;
+  if (Array.isArray(obj.sections)) {
+    const map = {};
+    obj.sections.forEach(sec => { if (sec && sec.id && Array.isArray(sec.body)) map[sec.id] = sec.body; });
+    return map;
+  }
+  return obj;
+}
+function isCustomerReading(obj) { return !!obj && typeof obj === "object" && obj.fixture !== true && obj.sample !== true; }
+
 function loadReading() {
-  if (window.COZ_TROPICAL_READING && typeof window.COZ_TROPICAL_READING === "object") return window.COZ_TROPICAL_READING;
+  if (isCustomerReading(window.COZ_TROPICAL_READING)) return readingFromContract(window.COZ_TROPICAL_READING);
   try {
-    const stored = localStorage.getItem("cozTropicalReading");
-    if (stored) { const parsed = JSON.parse(stored); if (parsed && typeof parsed === "object") return parsed; }
+    const stored = JSON.parse(localStorage.getItem("cozTropicalReading") || "null");
+    if (isCustomerReading(stored)) return readingFromContract(stored);
   } catch (e) {}
-  return COZ_TROPICAL_READING_FIXTURE;
+  return readingFromContract(COZ_TROPICAL_SAMPLE_READING);   // SAMPLE / FIXTURE, last resort only
 }
 
 /* ============================================================
