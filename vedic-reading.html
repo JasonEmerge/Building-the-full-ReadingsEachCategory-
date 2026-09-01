@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   COZALYZE · COMPLETE VEDIC READING · R2.3 · one document
+   COZALYZE · COMPLETE VEDIC READING · R2.4 · one document
    Paid dashboard + reveal + six reading sections in ONE document
    (standing rule: no iframe, no page navigation between them).
    Design tokens and structure follow the supplied spec verbatim.
@@ -244,14 +244,13 @@ body[data-view="reading"] .dash { display: none; }
   position: absolute;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
   aspect-ratio: 1068 / 1940;
-  /* --dash-zoom > 1 enlarges the art past the screen width (edges crop evenly),
-     capped so it never grows taller than the screen. 1 = contain-fit. */
-  /* zoom 1 = contain-fit (whole art visible). Above 1 the art grows past the screen
-     and crops evenly on all sides, centred on the middle of the art. */
-  width: calc(min(100vw, 100svh * 1068 / 1940) * var(--dash-zoom, 1));
-  transition: width 1400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  width: min(100vw, calc(100svh * 1068 / 1940));   /* contain-fit: the whole art */
+  /* --dash-zoom 1 = whole art; above 1 the stage scales up around its centre and
+     crops evenly. Done with transform so iOS animates it smoothly. */
+  transform: translate(-50%, -50%) scale(var(--dash-zoom, 1));
+  transition: transform 1400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
   container-type: inline-size;
   overflow: hidden;
 }
@@ -266,6 +265,7 @@ body[data-view="reading"] .dash { display: none; }
   display: block;
   background: var(--vedic-navy);
 }
+.stage video { background: transparent; }   /* the art under it shows until the first frame paints */
 .hot {
   position: absolute;
   margin: 0;
@@ -379,7 +379,7 @@ body.scroll-locked { overflow: hidden; touch-action: none; }
 <!-- ===== PAID DASHBOARD ===== -->
 <div class="dash" id="dash" aria-label="Your Vedic reading dashboard">
   <div class="stage" id="dashStage">
-    <img class="stage-art" src="vedic-dash.jpg" alt="" width="1068" height="1940">
+    <img class="stage-art" src="vedic-dash.jpg?v=24" alt="" width="1068" height="1940">
     <div class="asc-patch asc-patch-glyph" aria-hidden="true"></div>
     <div class="asc-patch asc-patch-text" aria-hidden="true"></div>
     <div class="asc-glyph" aria-hidden="true"></div>
@@ -398,7 +398,8 @@ body.scroll-locked { overflow: hidden; touch-action: none; }
 <!-- ===== REVEAL ===== -->
 <div class="reveal" id="reveal" role="dialog" aria-label="Opening your Vedic reading">
   <div class="stage" id="revealStage">
-    <video id="revealVideo" src="vedic-reading-reveal.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
+    <img class="stage-art" src="vedic-dash.jpg?v=24" alt="" width="1068" height="1940">
+    <video id="revealVideo" src="vedic-reading-reveal.mp4?v=24" muted playsinline preload="auto" aria-hidden="true"></video>
     <div class="asc-patch asc-patch-glyph" aria-hidden="true"></div>
     <div class="asc-patch asc-patch-text" aria-hidden="true"></div>
     <div class="asc-glyph" aria-hidden="true"></div>
@@ -420,7 +421,7 @@ body.scroll-locked { overflow: hidden; touch-action: none; }
   <div class="vedic-reading-content" id="vedicContent"></div>
 </main>
 
-<div class="vedic-stamp" aria-hidden="true">VEDIC READING · R2.3 · one document</div>
+<div class="vedic-stamp" aria-hidden="true">VEDIC READING · R2.4 · one document</div>
 
 <script>
 /* ============================================================
@@ -667,6 +668,8 @@ document.querySelectorAll(".hot[data-dash]").forEach(btn => {
 const revealEl = document.getElementById("reveal");
 const revealVideo = document.getElementById("revealVideo");
 let revealActive = false, revealDone = false, revealTimers = [];
+/* warm the clip while the dashboard is up so the turn can start the moment it is tapped */
+try { revealVideo.load(); } catch (e) {}
 
 function lockScroll(on) { document.body.classList.toggle("scroll-locked", on); }
 
@@ -684,18 +687,28 @@ function startReveal() {
   revealEl.classList.add("is-on");
   document.getElementById("revealLive").textContent = "Opening your Vedic reading";
 
-  // the live ascendant overlay stays while the buttons are still on screen, then lets go before the burst
-  revealTimers.push(setTimeout(() => revealEl.classList.add("asc-off"), 1450));
-  // hard fallback so a stalled clip never traps anyone
-  revealTimers.push(setTimeout(() => finishReveal(false), 3500));
+  // if the clip cannot even start (no network, blocked), move on rather than trap anyone
+  revealTimers.push(setTimeout(() => { if (!revealStarted) finishReveal(false); }, 7000));
 
+  revealStarted = false;
   try { revealVideo.currentTime = 0; } catch (e) {}
   const p = revealVideo.play();
   if (p && p.catch) p.catch(() => finishReveal(false));
 }
 
+/* timers that depend on the clip actually running start only once it is playing */
+let revealStarted = false;
+revealVideo.addEventListener("playing", () => {
+  if (revealStarted || !revealActive) return;
+  revealStarted = true;
+  // the live ascendant overlay stays while the buttons are still on screen, then lets go before the burst
+  revealTimers.push(setTimeout(() => revealEl.classList.add("asc-off"), 1450));
+  // hard cap a little past the clip's 2.5s so a stalled clip never traps anyone
+  revealTimers.push(setTimeout(() => finishReveal(false), 3600));
+});
+
 function finishReveal(immediate) {
-  if (revealDone) return;
+  if (!revealActive || revealDone) return;   // ignore clip events while the reveal is not running
   revealDone = true;
   revealTimers.forEach(clearTimeout); revealTimers = [];
   const land = () => {
