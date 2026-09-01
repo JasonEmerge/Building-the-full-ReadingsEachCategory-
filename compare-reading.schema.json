@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CozAlyze Combined Reading (generator output + server metadata)",
+  "type": "object",
+  "required": ["system", "title", "subtitle", "fixture", "sections", "calculation"],
+  "properties": {
+    "system": { "const": "compare" },
+    "title": { "const": "Your Combined Reading" },
+    "subtitle": { "const": "Tropical + Vedic. One Complete View." },
+    "fixture": { "const": false },
+    "userId": { "type": "string" }, "chartId": { "type": "string" }, "generatedAt": { "type": "string" },
+    "calculation": {
+      "type": "object",
+      "required": ["engineVersion", "tropicalHouseSystemRequested", "tropicalHouseSystemUsed", "lahiri", "nodeMethod", "utcBirth", "timeZone"],
+      "properties": {
+        "engineVersion": { "type": "string" },
+        "tropicalHouseSystemRequested": { "enum": ["placidus"] },
+        "tropicalHouseSystemUsed": { "enum": ["placidus", "whole-sign"] },
+        "placidusFallbackReason": { "type": ["string", "null"] },
+        "lahiri": { "type": "string" },
+        "nodeMethod": { "const": "mean" },
+        "utcBirth": { "type": "string" },
+        "timeZone": { "type": "string" },
+        "dstOffset": { "type": ["string", "number"] },
+        "boundaryWarnings": { "type": "array", "items": { "type": "string" } },
+        "readingAsOf": { "type": "string" }
+      }
+    },
+    "sections": {
+      "type": "array", "minItems": 6, "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["id", "number", "title", "sourceFactors"],
+        "properties": {
+          "id": { "enum": ["at-your-core","love-desire-creativity","work-money-expression","wisdom-purpose-legacy","challenges-resilience","integrated-takeaway"] },
+          "number": { "type": "integer", "minimum": 1, "maximum": 6 },
+          "title": { "type": "string" },
+          "tropicalPerspective": { "type": "array", "items": { "type": "string" } },
+          "vedicPerspective": { "type": "array", "items": { "type": "string" } },
+          "completeView": { "type": "array", "items": { "type": "string" } },
+          "body": { "type": "array", "items": { "type": "string" } },
+          "comparison": { "type": "object" },
+          "sourceFactors": { "type": "object", "properties": { "tropical": { "type": "array" }, "vedic": { "type": "array" } } }
+        }
+      }
+    }
+  }
+}
