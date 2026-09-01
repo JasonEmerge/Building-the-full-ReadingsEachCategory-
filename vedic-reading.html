@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   COZALYZE · COMPLETE VEDIC READING · R2.0 · one document
+   COZALYZE · COMPLETE VEDIC READING · R2.2 · one document
    Paid dashboard + reveal + six reading sections in ONE document
    (standing rule: no iframe, no page navigation between them).
    Design tokens and structure follow the supplied spec verbatim.
@@ -24,6 +24,8 @@
   --display-font: "Cormorant Garamond", Georgia, serif;
   --body-font: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
   --side-pad: 28px;
+  --dash-zoom: 1;            /* opens showing the whole art, then eases to --dash-zoom-in */
+  --dash-zoom-in: 1.12;
 }
 @media (max-width: 374px) { :root { --side-pad: 20px; } }
 
@@ -73,6 +75,7 @@ body {
 }
 @media (prefers-reduced-motion: reduce) {
   .vedic-reading-content { animation: none; }
+  .stage { transition: none; }
 }
 
 /* ---------- header ---------- */
@@ -243,7 +246,10 @@ body[data-view="reading"] .dash { display: none; }
   top: 50%;
   transform: translate(-50%, -50%);
   aspect-ratio: 1068 / 1940;
-  width: min(100vw, calc(100svh * 1068 / 1940));
+  /* --dash-zoom > 1 enlarges the art past the screen width (edges crop evenly),
+     capped so it never grows taller than the screen. 1 = contain-fit. */
+  width: min(calc(100vw * var(--dash-zoom, 1)), calc(100svh * 1068 / 1940));
+  transition: width 1400ms cubic-bezier(0.22, 0.61, 0.36, 1);
   container-type: inline-size;
   overflow: hidden;
 }
@@ -412,7 +418,7 @@ body.scroll-locked { overflow: hidden; touch-action: none; }
   <div class="vedic-reading-content" id="vedicContent"></div>
 </main>
 
-<div class="vedic-stamp" aria-hidden="true">VEDIC READING · R2.0 · one document</div>
+<div class="vedic-stamp" aria-hidden="true">VEDIC READING · R2.2 · one document</div>
 
 <script>
 /* ============================================================
@@ -610,6 +616,18 @@ function paintAscendant(stage, sign) {
   stage.querySelector(".asc-glyph").textContent = SIGN_GLYPH[sign] + "\uFE0E";
   stage.querySelector(".asc-label").textContent = sign;
 }
+
+/* Entrance: the whole art is shown first, then it eases in slightly so the type reads larger.
+   Once per page load; the reveal's stage shares the variable so the clip matches. */
+function dashZoomIn() {
+  const target = getComputedStyle(document.documentElement).getPropertyValue("--dash-zoom-in").trim() || "1.12";
+  const go = () => document.documentElement.style.setProperty("--dash-zoom", target);
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { go(); return; }
+  const art = document.querySelector("#dashStage .stage-art");
+  const start = () => setTimeout(go, 650);
+  if (art.complete) start(); else art.addEventListener("load", start, { once: true });
+}
+dashZoomIn();
 
 const ASC_SIGN = resolveAscendant();
 paintAscendant(document.getElementById("dashStage"), ASC_SIGN);
