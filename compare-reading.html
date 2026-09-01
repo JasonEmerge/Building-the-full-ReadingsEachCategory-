@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
 <style>
 /* ============================================================
-   COZALYZE · COMPARE · COMBINED READING · C1.1 · one document
+   COZALYZE · COMPARE · COMBINED READING · C1.2 · one document
    Paid dashboard + reveal + six reading sections in ONE document
    (standing rule: no iframe, no page navigation between them).
    Design tokens and structure follow the supplied spec verbatim.
@@ -25,7 +25,7 @@
   --body-font: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
   --side-pad: 28px;
   --dash-zoom: 1.26;         /* the clip's first frame is letterboxed: 1.26 crops the black border so the whole ART shows, then eases to --dash-zoom-in */
-  --dash-zoom-in: 1.5;    /* 1.5 on the letterboxed frame = about 1.2 on the art itself, buttons ~80% of the screen */
+  --dash-zoom-in: 1.34;   /* pulled back from 1.5 so the title clears the edges; ~1.06 on the art itself */
   --reveal-zoom: 1.23;    /* the clip zooms itself in over its first second, so the stage eases back to cover-fit */
 }
 @media (max-width: 374px) { :root { --side-pad: 20px; } }
@@ -420,7 +420,7 @@ body.scroll-locked { overflow: hidden; touch-action: none; }
   <div class="vedic-reading-content" id="vedicContent"></div>
 </main>
 
-<div class="vedic-stamp" aria-hidden="true">COMBINED READING · C1.1 · one document</div>
+<div class="vedic-stamp" aria-hidden="true">COMBINED READING · C1.2 · one document</div>
 
 <script>
 /* ============================================================
@@ -597,7 +597,7 @@ function idFromHash() {
 function showDashboard() {
   document.body.dataset.view = "dashboard";
   document.documentElement.classList.remove("reveal-zooming");
-  if (window.__dashZoomed) document.documentElement.style.setProperty("--dash-zoom", getComputedStyle(document.documentElement).getPropertyValue("--dash-zoom-in").trim() || "1.5");
+  if (window.__dashZoomed) document.documentElement.style.setProperty("--dash-zoom", getComputedStyle(document.documentElement).getPropertyValue("--dash-zoom-in").trim() || "1.34");
   document.title = "Your Combined Reading · CozAlyze";
   window.scrollTo({ top: 0, behavior: "instant" });
 }
@@ -755,7 +755,7 @@ function cancelReveal() {
   revealDone = true;
   revealTimers.forEach(clearTimeout); revealTimers = [];
   document.documentElement.classList.remove("reveal-zooming");
-  document.documentElement.style.setProperty("--dash-zoom", getComputedStyle(document.documentElement).getPropertyValue("--dash-zoom-in").trim() || "1.5");
+  document.documentElement.style.setProperty("--dash-zoom", getComputedStyle(document.documentElement).getPropertyValue("--dash-zoom-in").trim() || "1.34");
   try { revealVideo.pause(); revealVideo.currentTime = 0; } catch (e) {}
   revealEl.classList.remove("is-on", "is-closing", "asc-off");
   lockScroll(false);
