@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000f26">
+<title>Your Combined Reading · CozAlyze</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   COZALYZE · COMPARE · COMBINED READING · C1.1 · one document
+   Paid dashboard + reveal + six reading sections in ONE document
+   (standing rule: no iframe, no page navigation between them).
+   Design tokens and structure follow the supplied spec verbatim.
+   ============================================================ */
+:root {
+  --vedic-navy: #000f26;
+  --vedic-gold: #d4a178;
+  --vedic-gold-muted: rgba(212, 161, 120, 0.65);
+  --vedic-ivory: #e5d4c5;
+  --vedic-ivory-muted: rgba(229, 212, 197, 0.88);
+  --display-font: "Cormorant Garamond", Georgia, serif;
+  --body-font: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  --side-pad: 28px;
+  --dash-zoom: 1.26;         /* the clip's first frame is letterboxed: 1.26 crops the black border so the whole ART shows, then eases to --dash-zoom-in */
+  --dash-zoom-in: 1.5;    /* 1.5 on the letterboxed frame = about 1.2 on the art itself, buttons ~80% of the screen */
+  --reveal-zoom: 1.23;    /* the clip zooms itself in over its first second, so the stage eases back to cover-fit */
+}
+@media (max-width: 374px) { :root { --side-pad: 20px; } }
+
+* { box-sizing: border-box; }
+html { background: var(--vedic-navy); -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--vedic-navy);
+  color: var(--vedic-ivory);
+  font-family: var(--body-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Fixed background layer: iOS ignores background-attachment on body,
+   so the image lives on its own fixed layer behind the scrolling content. */
+.vedic-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--vedic-navy);
+  background-image: url("compare-moon-bg.png?v=11");   /* his sun-and-moon medallion backdrop for the Combined reading */
+  background-size: cover;
+  background-position: top center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+.vedic-reading-page {
+  position: relative;
+  z-index: 1;
+  min-height: 100svh;
+  padding:
+    calc(env(safe-area-inset-top) + 24px)
+    var(--side-pad)
+    calc(env(safe-area-inset-bottom) + 24px);
+}
+
+.vedic-reading-content {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  animation: vedicFadeIn 240ms ease-out;
+}
+@keyframes vedicFadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vedic-reading-content { animation: none; }
+  .stage { transition: none; }
+}
+
+/* ---------- header ---------- */
+.vedic-back-button {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 10px);
+  left: calc(var(--side-pad) - 10px);
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: var(--vedic-gold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.vedic-back-button svg { width: 30px; height: 20px; display: block; }
+.vedic-back-button:focus-visible { outline: 1px solid var(--vedic-gold-muted); outline-offset: 4px; border-radius: 4px; }
+
+.vedic-header {
+  text-align: center;
+  padding-top: 6px;
+}
+/* His logo lockup (emblem + CozAlyze wordmark) as one image, white keyed out.
+   Width is set so the wordmark reads at the spec's 28–30px display size. */
+.vedic-logo {
+  display: block;
+  width: 140px;
+  height: auto;
+  margin: 0 auto;
+}
+.vedic-eyebrow {
+  font-family: var(--body-font);
+  font-size: clamp(13px, 3.5vw, 14.5px);
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--vedic-ivory-muted);
+  margin: 12px 0 0;
+  padding-left: 0.28em; /* optical centre with the trailing tracking */
+}
+.vedic-counter {
+  font-family: var(--display-font);
+  font-size: clamp(27px, 7.2vw, 31px);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  font-variant-numeric: lining-nums;
+  color: var(--vedic-gold);
+  margin: 40px 0 0;
+}
+
+/* ---------- ornamental divider ---------- */
+.vedic-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: min(100%, 420px);
+  margin: 14px auto;
+  color: var(--vedic-gold);
+}
+.vedic-divider::before,
+.vedic-divider::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--vedic-gold-muted);
+}
+.vedic-divider svg { width: 16px; height: 16px; flex: 0 0 auto; display: block; }
+
+/* ---------- title ---------- */
+.vedic-title {
+  font-family: var(--display-font);
+  font-size: clamp(2.6rem, 11.5vw, 3.4rem);
+  font-weight: 500;
+  line-height: 0.98;
+  color: var(--vedic-gold);
+  text-align: center;
+  text-wrap: balance;
+  margin: 10px 0;
+}
+.vedic-title--long {
+  font-size: clamp(2.35rem, 10vw, 2.9rem);
+}
+
+/* ---------- body ---------- */
+.vedic-body {
+  font-family: var(--body-font);
+  font-size: clamp(1.25rem, 5.4vw, 1.4rem);
+  line-height: 1.55;
+  font-weight: 400;
+  color: var(--vedic-ivory);
+  margin-top: 24px;
+}
+.vedic-body p { margin: 0 0 1.35em; }
+/* PROVISIONAL layout for the three parts of a Combined section: reuses the existing
+   eyebrow and divider styles only, no new visual elements, until the compare reading is designed. */
+.vedic-body .vedic-part-label { text-align: center; margin: 0 0 1.1em; color: var(--vedic-gold); font-size: clamp(12px, 3.2vw, 13.5px); }
+.vedic-body .vedic-divider--part { margin: 0.4em auto 1.4em; }
+.vedic-body p:last-child { margin-bottom: 0; }
+
+/* ---------- bottom navigation ---------- */
+.vedic-nav { margin-top: 34px; }
+.vedic-nav-rule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--vedic-gold);
+}
+.vedic-nav-rule::before,
+.vedic-nav-rule::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--vedic-gold-muted);
+}
+.vedic-nav-rule svg { width: 14px; height: 14px; flex: 0 0 auto; display: block; }
+.vedic-nav-links {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding-top: 6px;
+}
+.vedic-nav a,
+.vedic-nav button {
+  font-family: var(--body-font);
+  font-size: clamp(16px, 4.3vw, 18px);
+  font-weight: 400;
+  color: var(--vedic-gold);
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  text-align: left;
+}
+.vedic-nav a:focus-visible,
+.vedic-nav button:focus-visible { outline: 1px solid var(--vedic-gold-muted); outline-offset: 4px; border-radius: 4px; }
+.vedic-nav .vedic-nav-next { text-align: right; justify-content: flex-end; }
+.vedic-nav svg:not(.vedic-nav-rule svg) { width: 24px; height: 15px; flex: 0 0 auto; }
+
+/* ============================================================
+   PAID DASHBOARD  (his art = frame 0 of the reveal clip, so the
+   dashboard and the video's first frame are pixel-identical)
+   ============================================================ */
+body[data-view="dashboard"] .vedic-reading-page,
+body[data-view="dashboard"] .vedic-bg { display: none; }
+body[data-view="reading"] .dash { display: none; }
+
+.dash {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  background: #000;   /* this clip's first frame carries a black border */
+  overflow: hidden;
+}
+/* one shared stage: contain-fit box with the clip's exact aspect, centred */
+.stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  aspect-ratio: 1084 / 1908;
+  width: min(100vw, calc(100svh * 1084 / 1908));   /* contain-fit: the whole art */
+  /* --dash-zoom 1 = whole art; above 1 the stage scales up around its centre and
+     crops evenly. Done with transform so iOS animates it smoothly. */
+  transform: translate(-50%, -50%) scale(var(--dash-zoom, 1));
+  transition: transform 1400ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+html.reveal-zooming .stage {
+  transition: transform 900ms linear;   /* counter-zoom while the clip zooms itself in */
+  container-type: inline-size;
+  overflow: hidden;
+}
+.stage-art,
+.stage video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  background: var(--vedic-navy);
+}
+.stage video { background: transparent; }   /* the art under it shows until the first frame paints */
+.hot {
+  position: absolute;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  color: transparent;
+  font-size: 0;
+}
+.hot:focus-visible { outline: 1px solid var(--vedic-gold-muted); outline-offset: 2px; border-radius: 8px; }
+.hot[disabled] { cursor: default; }
+/* live ascendant: shown ONLY when the sign is not the sample Leo baked into the art */
+.asc-patch, .asc-glyph, .asc-label { position: absolute; display: none; pointer-events: none; }
+.stage[data-asc-live="1"] .asc-patch,
+.stage[data-asc-live="1"] .asc-glyph,
+.stage[data-asc-live="1"] .asc-label { display: block; }
+/* geometry measured on the 1084-wide letterboxed frame, all in cqw:
+   baked Leo glyph ring centred (303,1240), ring outer radius ~34; no sign label on this art */
+.asc-patch-glyph {
+  left: 25.55cqw; top: 111.99cqw;
+  width: 4.8cqw; height: 4.8cqw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(5,17,33) 0 66%, rgba(5,17,33,0) 100%);
+}
+.asc-patch-text { display: none !important; }
+.asc-label { display: none !important; }
+.asc-glyph {
+  left: 25.55cqw; top: 111.99cqw;
+  width: 4.8cqw; height: 4.8cqw;
+  font: 400 3.1cqw/4.8cqw "Cormorant Garamond", "Apple Symbols", "Segoe UI Symbol", serif;
+  text-align: center;
+  color: #d9b48a;
+}
+.dash-preparing .hot-reading { opacity: 0.45; }
+
+/* ============================================================
+   REVEAL OVERLAY  (video plays once, then everything disappears
+   and the reading emerges)
+   ============================================================ */
+.reveal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  overflow: hidden;
+  display: none;
+}
+.reveal.is-on { display: block; }
+.reveal .asc-patch, .reveal .asc-glyph, .reveal .asc-label { transition: opacity 320ms ease-out; }
+.reveal.asc-off .asc-patch, .reveal.asc-off .asc-glyph, .reveal.asc-off .asc-label { opacity: 0; }
+.reveal-curtain {
+  position: absolute;
+  inset: 0;
+  background: var(--vedic-navy);
+  opacity: 0;
+  transition: opacity 480ms ease-in;
+  pointer-events: none;
+}
+.reveal.is-closing .reveal-curtain { opacity: 1; }
+.reveal-back {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 10px);
+  left: 18px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--vedic-gold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.reveal-back svg { width: 30px; height: 20px; display: block; }
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+body.scroll-locked { overflow: hidden; touch-action: none; }
+
+/* ---------- build stamp (project standing rule) ---------- */
+.vedic-stamp {
+  position: fixed;
+  right: 8px;
+  bottom: calc(env(safe-area-inset-bottom) + 4px);
+  z-index: 2;
+  font: 9px/1 var(--body-font);
+  letter-spacing: 0.08em;
+  color: rgba(212, 161, 120, 0.35);
+  pointer-events: none;
+}
+</style>
+</head>
+<body data-view="dashboard">
+
+<div class="vedic-bg" aria-hidden="true"></div>
+
+<!-- ===== PAID DASHBOARD ===== -->
+<div class="dash" id="dash" aria-label="Compare Your Charts dashboard">
+  <div class="stage" id="dashStage">
+    <img class="stage-art" src="compare-dash.jpg?v=10" alt="" width="1084" height="1908">
+    <div class="asc-patch asc-patch-glyph" aria-hidden="true"></div>
+    <div class="asc-patch asc-patch-text" aria-hidden="true"></div>
+    <div class="asc-glyph" aria-hidden="true"></div>
+    <div class="asc-label" aria-hidden="true"></div>
+
+    <button class="hot hot-reading" id="hotReading" type="button" style="left:23.99%;top:57.23%;width:53.04%;height:4.19%" aria-label="Your Combined Reading">Your Combined Reading</button>
+    <button class="hot" type="button" data-dash="ascendant"  style="left:23.99%;top:62.63%;width:53.04%;height:4.45%" aria-label="Your Ascendants">Your Ascendants</button>
+    <button class="hot" type="button" data-dash="timing" style="left:23.99%;top:69.18%;width:53.04%;height:4.45%" aria-label="Your Current Timing">Your Current Timing</button>
+    <button class="hot" type="button" data-dash="birth-charts" style="left:23.99%;top:75.21%;width:53.04%;height:4.45%" aria-label="Your Birth Charts">Your Birth Charts</button>
+    <button class="hot" type="button" data-dash="home"    style="left:18.91%;top:86.74%;width:20.11%;height:3.14%" aria-label="Home">Home</button>
+    <button class="hot" type="button" data-dash="saved"   style="left:39.02%;top:86.74%;width:20.11%;height:3.14%" aria-label="Saved">Saved</button>
+    <button class="hot" type="button" data-dash="account" style="left:59.13%;top:86.74%;width:20.11%;height:3.14%" aria-label="Account">Account</button>
+  </div>
+</div>
+
+<!-- ===== REVEAL ===== -->
+<div class="reveal" id="reveal" role="dialog" aria-label="Opening your Combined reading">
+  <div class="stage" id="revealStage">
+    <img class="stage-art" src="compare-dash.jpg?v=10" alt="" width="1084" height="1908">
+    <video id="revealVideo" src="compare-reading-reveal.mp4?v=10" muted playsinline preload="auto" aria-hidden="true"></video>
+    <div class="asc-patch asc-patch-glyph" aria-hidden="true"></div>
+    <div class="asc-patch asc-patch-text" aria-hidden="true"></div>
+    <div class="asc-glyph" aria-hidden="true"></div>
+    <div class="asc-label" aria-hidden="true"></div>
+  </div>
+  <div class="reveal-curtain" aria-hidden="true"></div>
+  <button class="reveal-back" id="revealBack" type="button" aria-label="Return to your Compare dashboard">
+    <svg viewBox="0 0 30 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M29 10H2M9 3 2 10l7 7"/></svg>
+  </button>
+  <span class="sr-only" aria-live="polite" id="revealLive"></span>
+</div>
+
+<main class="vedic-reading-page" id="vedicPage">
+  <button class="vedic-back-button" id="vedicBack" type="button" aria-label="Back to your Compare dashboard">
+    <svg viewBox="0 0 30 20" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M29 10H2M9 3 2 10l7 7"/>
+    </svg>
+  </button>
+  <div class="vedic-reading-content" id="vedicContent"></div>
+</main>
+
+<div class="vedic-stamp" aria-hidden="true">COMBINED READING · C1.1 · one document</div>
+
+<script>
+/* ============================================================
+   SECTION DATA (spec, verbatim)
+   ============================================================ */
+const vedicReadingSections = [
+  { id: "at-your-core",            number: 1, title: "At Your Core",              nextLabel: "Love, Desire & Creativity" },
+  { id: "love-desire-creativity",  number: 2, title: "Love, Desire & Creativity", nextLabel: "Work, Money & Expression" },
+  { id: "work-money-expression",   number: 3, title: "Work, Money & Expression",  nextLabel: "Wisdom, Purpose & Legacy" },
+  { id: "wisdom-purpose-legacy",   number: 4, title: "Wisdom, Purpose & Legacy",  nextLabel: "Challenges & Resilience" },
+  { id: "challenges-resilience",   number: 5, title: "Challenges & Resilience",   nextLabel: "Your Integrated Takeaway" },
+  { id: "integrated-takeaway",     number: 6, title: "Your Integrated Takeaway",  nextLabel: null }
+];
+const SECTION_TOTAL = String(vedicReadingSections.length).padStart(2, "0");
+
+/* ============================================================
+   READING SOURCE
+   The server-side generator supplies the reading in the spec's JSON
+   contract ({ system, title, subtitle, sections:[{id, number, title,
+   body[], sourceFactors[]}] }) as window.COZ_COMPARE_READING or stored
+   in localStorage "cozCompareReading". A flat { "<section id>": [...] }
+   shape is also accepted. sourceFactors are never rendered.
+   Anything carrying fixture: true is refused as customer content.
+   ============================================================ */
+/* ============================================================
+   >>> PLACEHOLDER / FIXTURE CONTENT. NOT A CUSTOMER READING. <<<
+   The Combined (compare) reading has not been specified yet. These
+   short paragraphs exist only so the six-page flow can be walked.
+   They are refused as customer content (fixture: true) and will be
+   replaced by the combined generator's output once that spec exists.
+   ============================================================ */
+const COZ_COMPARE_SAMPLE_READING = {
+  fixture: true, sample: true, customer: null,
+  system: "compare", title: "Your Combined Reading", subtitle: "Tropical + Vedic. One Complete View.",
+  sections: [
+    { id:"at-your-core", number:1, title:"At Your Core", sourceFactors:["placeholder"],
+      tropicalPerspective:["Placeholder. The Tropical view of central identity: how you meet the world, the manner others recognise, the outward temperament drawn from the Sun, Moon, Ascendant and chart ruler."],
+      vedicPerspective:["Placeholder. The Vedic view of the self underneath: what the Lagna and its lord, the Moon and their Nakshatras suggest about inner orientation and the patterns that repeat."],
+      completeView:["Placeholder. Where the two agree, the reading may treat it as a settled feature. Where they differ, it may describe a range: the self that shows and the self that runs underneath, operating together in one person."] },
+    { id:"love-desire-creativity", number:2, title:"Love, Desire & Creativity", sourceFactors:["placeholder"],
+      tropicalPerspective:["Placeholder. Attraction, romantic behaviour and creative instinct as the Tropical chart describes them."],
+      vedicPerspective:["Placeholder. Relationship and creative themes as the Vedic fifth, seventh and eighth houses, their lords and the Moon describe them."],
+      completeView:["Placeholder. Reinforcement, complement or contrast between the two, and how they may operate together."] },
+    { id:"work-money-expression", number:3, title:"Work, Money & Expression", sourceFactors:["placeholder"],
+      tropicalPerspective:["Placeholder. Communication, work style and public identity from the Tropical chart."],
+      vedicPerspective:["Placeholder. Resources, effort and voice from the Vedic second, third, sixth and tenth houses and their lords."],
+      completeView:["Placeholder. The public role and the underlying calling, read together."] },
+    { id:"wisdom-purpose-legacy", number:4, title:"Wisdom, Purpose & Legacy", sourceFactors:["placeholder"],
+      tropicalPerspective:["Placeholder. Beliefs, growth direction and the nodes as the Tropical chart frames them."],
+      vedicPerspective:["Placeholder. Dharma houses, Rahu and Ketu, and the developmental themes the Vedic chart points toward."],
+      completeView:["Placeholder. Two readings of one theme, and what they suggest together."] },
+    { id:"challenges-resilience", number:5, title:"Challenges & Resilience", sourceFactors:["placeholder"],
+      tropicalPerspective:["Placeholder. Recurring pressures and supports as the Tropical chart describes them."],
+      vedicPerspective:["Placeholder. Saturn, Mars and the nodes, the sixth, eighth and twelfth houses and their lords, as the Vedic chart describes them."],
+      completeView:["Placeholder. What tends to show on the surface, what tends to run underneath, and the supports both systems find."] },
+    { id:"integrated-takeaway", number:6, title:"Your Integrated Takeaway", sourceFactors:["placeholder"],
+      body:["Placeholder. A single synthesis using only the strongest patterns already established above: the themes both systems share, and the one place they most usefully disagree. No new placements, no new conclusions."] }
+  ]
+};
+
+/* Combined reading contract: each section carries three parts,
+   tropicalPerspective[], vedicPerspective[], completeView[] (paragraph arrays).
+   A plain body[] is also accepted and rendered as one run of paragraphs. */
+const PART_LABELS = [["tropicalPerspective", "Tropical Perspective"], ["vedicPerspective", "Vedic Perspective"], ["completeView", "Complete View"]];
+function readingFromContract(obj) {
+  if (!obj || typeof obj !== "object") return null;
+  if (Array.isArray(obj.sections)) {
+    const map = {};
+    obj.sections.forEach(sec => {
+      if (!sec || !sec.id) return;
+      if (PART_LABELS.some(([k]) => Array.isArray(sec[k]))) map[sec.id] = { parts: PART_LABELS.filter(([k]) => Array.isArray(sec[k])).map(([k, label]) => ({ label, paragraphs: sec[k] })) };
+      else if (Array.isArray(sec.body)) map[sec.id] = sec.body;
+    });
+    return map;
+  }
+  return obj;
+}
+function isCustomerReading(obj) { return !!obj && typeof obj === "object" && obj.fixture !== true && obj.sample !== true; }
+
+function loadReading() {
+  if (isCustomerReading(window.COZ_COMPARE_READING)) return readingFromContract(window.COZ_COMPARE_READING);
+  try {
+    const stored = JSON.parse(localStorage.getItem("cozCompareReading") || "null");
+    if (isCustomerReading(stored)) return readingFromContract(stored);
+  } catch (e) {}
+  return readingFromContract(COZ_COMPARE_SAMPLE_READING);   // SAMPLE / FIXTURE, last resort only
+}
+
+/* ============================================================
+   NAVIGATION TARGETS
+   The dashboard lives in THIS document at #/dashboard, so going
+   back never leaves the page.
+   ============================================================ */
+const params = new URLSearchParams(location.search);
+const DASHBOARD_HREF = "#/dashboard";
+
+function goDashboard() {
+  if (idFromHash() === "dashboard") showFromHash(); else location.hash = DASHBOARD_HREF;
+}
+
+function finishReading() {
+  try { localStorage.setItem("cozCompareReadingComplete", new Date().toISOString()); } catch (e) {}
+  try { window.dispatchEvent(new CustomEvent("COZ_COMPARE_READING_COMPLETE")); } catch (e) {}
+  goDashboard();
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+const STAR_SVG = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0 13.6 10.4 24 12 13.6 13.6 12 24 10.4 13.6 0 12 10.4 10.4Z"/></svg>';
+const ARROW_L = '<svg viewBox="0 0 22 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 7H2M7 2 2 7l5 5"/></svg>';
+const ARROW_R = '<svg viewBox="0 0 22 14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 7h19M15 2l5 5-5 5"/></svg>';
+
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+function sectionById(id) { return vedicReadingSections.find(s => s.id === id) || vedicReadingSections[0]; }
+
+function renderSection(section) {
+  const reading = loadReading();
+  const entry = reading[section.id];
+  const paragraphs = Array.isArray(entry) ? entry : [];
+  const parts = entry && Array.isArray(entry.parts) ? entry.parts : null;
+  const sectionCounter = `${String(section.number).padStart(2, "0")} OF ${SECTION_TOTAL}`;
+  const titleClass = section.title.length > 22 ? "vedic-title vedic-title--long" : "vedic-title";
+  const next = section.nextLabel ? vedicReadingSections[section.number] : null;
+
+  const nextControl = next
+    ? `<a class="vedic-nav-next" href="#/${next.id}" data-next="${next.id}">Next: ${esc(section.nextLabel)} ${ARROW_R}</a>`
+    : `<button class="vedic-nav-next" type="button" id="vedicFinish">Finish Reading ${ARROW_R}</button>`;
+
+  const html = `
+    <header class="vedic-header">
+      <img class="vedic-logo" src="vedic-logo.png" alt="CozAlyze" width="1000" height="1055">
+      <p class="vedic-eyebrow">Your Combined Reading</p>
+      <p class="vedic-counter">${sectionCounter}</p>
+    </header>
+    <div class="vedic-divider" aria-hidden="true">${STAR_SVG}</div>
+    <h1 class="${titleClass}">${esc(section.title)}</h1>
+    <div class="vedic-divider" aria-hidden="true">${STAR_SVG}</div>
+    <section class="vedic-body">
+      ${parts
+        ? parts.map((part, i) => `${i ? `<div class="vedic-divider vedic-divider--part" aria-hidden="true">${STAR_SVG}</div>` : ""}<p class="vedic-eyebrow vedic-part-label">${esc(part.label)}</p>${part.paragraphs.map(p => `<p>${esc(p)}</p>`).join("")}`).join("")
+        : paragraphs.map(p => `<p>${esc(p)}</p>`).join("")}
+    </section>
+    <nav class="vedic-nav" aria-label="Reading navigation">
+      <div class="vedic-nav-rule" aria-hidden="true">${STAR_SVG}</div>
+      <div class="vedic-nav-links">
+        <a href="#/dashboard" id="vedicNavBack">${ARROW_L} Back to Your Reading</a>
+        ${nextControl}
+      </div>
+    </nav>`;
+
+  const old = document.getElementById("vedicContent");
+  const fresh = old.cloneNode(false);      // fresh node so the fade re-runs on every section
+  fresh.innerHTML = html;
+  old.replaceWith(fresh);
+
+  document.title = `${section.title} · Your Combined Reading · CozAlyze`;
+
+  const finish = document.getElementById("vedicFinish");
+  if (finish) finish.addEventListener("click", finishReading);
+}
+
+/* ============================================================
+   HISTORY / ROUTING  (#/<section id>)
+   ============================================================ */
+function idFromHash() {
+  const m = location.hash.match(/^#\/?([a-z0-9-]+)/i);
+  return m ? m[1] : null;
+}
+
+function showDashboard() {
+  document.body.dataset.view = "dashboard";
+  document.documentElement.classList.remove("reveal-zooming");
+  if (window.__dashZoomed) document.documentElement.style.setProperty("--dash-zoom", getComputedStyle(document.documentElement).getPropertyValue("--dash-zoom-in").trim() || "1.5");
+  document.title = "Your Combined Reading · CozAlyze";
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
+
+function showFromHash() {
+  const id = idFromHash();
+  if (!id || id === "dashboard") {
+    if (id !== "dashboard") history.replaceState({ id: "dashboard" }, "", "#/dashboard");
+    showDashboard();
+    return;
+  }
+  const section = sectionById(id);
+  if (id !== section.id) {
+    history.replaceState({ id: section.id }, "", `#/${section.id}`);
+  }
+  document.body.dataset.view = "reading";
+  renderSection(section);
+  window.scrollTo({ top: 0, behavior: "instant" });
+}
+
+document.getElementById("vedicBack").addEventListener("click", goDashboard);
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+const SIGNS = ["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
+const SAMPLE_SIGN_IN_ART = "Leo";   // baked into compare-dash.jpg and the clip's first frames
+const SIGN_GLYPH = { Aries:"\u2648", Taurus:"\u2649", Gemini:"\u264A", Cancer:"\u264B", Leo:"\u264C", Virgo:"\u264D",
+  Libra:"\u264E", Scorpio:"\u264F", Sagittarius:"\u2650", Capricorn:"\u2651", Aquarius:"\u2652", Pisces:"\u2653" };
+
+function resolveAscendant() {
+  const pick = v => { if (!v) return null; v = String(v).trim(); v = v.charAt(0).toUpperCase() + v.slice(1).toLowerCase(); return SIGNS.includes(v) ? v : null; };
+  // The Ascendants button shows ONE glyph. This page uses the TROPICAL ascendant for it
+  // (?asc=, window.EMERGE_ASCENDANT_TROPICAL, stored emergeAscendantTropical). Two ascendants
+  // exist for the compare product; which one the icon shows is a design call, easy to switch here.
+  return pick(params.get("asc")) || pick(window.EMERGE_ASCENDANT_TROPICAL) || pick((() => { try { return localStorage.getItem("emergeAscendantTropical"); } catch (e) { return null; } })()) || SAMPLE_SIGN_IN_ART;
+}
+
+function paintAscendant(stage, sign) {
+  const live = sign !== SAMPLE_SIGN_IN_ART;
+  stage.dataset.ascLive = live ? "1" : "0";
+  stage.querySelector(".asc-glyph").textContent = live ? SIGN_GLYPH[sign] + "\uFE0E" : "";
+  stage.querySelector(".asc-label").textContent = sign;
+}
+
+/* Entrance: the whole art is shown first, then it eases in slightly so the type reads larger.
+   Once per page load; the reveal's stage shares the variable so the clip matches. */
+function dashZoomIn() {
+  const target = getComputedStyle(document.documentElement).getPropertyValue("--dash-zoom-in").trim() || "1.12";
+  const go = () => { window.__dashZoomed = true; document.documentElement.style.setProperty("--dash-zoom", target); };
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { go(); return; }
+  const art = document.querySelector("#dashStage .stage-art");
+  const start = () => setTimeout(go, 650);
+  if (art.complete) start(); else art.addEventListener("load", start, { once: true });
+}
+dashZoomIn();
+
+const ASC_SIGN = resolveAscendant();
+paintAscendant(document.getElementById("dashStage"), ASC_SIGN);
+paintAscendant(document.getElementById("revealStage"), ASC_SIGN);
+document.querySelector('[data-dash="ascendant"]').setAttribute("aria-label", `Your Ascendants, ${ASC_SIGN}`);
+
+/* Reading readiness. The engine sets window.COZ_COMPARE_READING_STATUS = "preparing"
+   while it works; anything else counts as ready. The reading is never regenerated
+   here, this page only reads what the engine stored. */
+function readingReady() { return window.COZ_COMPARE_READING_STATUS !== "preparing"; }
+function syncReadyState() {
+  const ready = readingReady();
+  const b = document.getElementById("hotReading");
+  b.disabled = !ready;
+  b.setAttribute("aria-label", ready ? "Your Combined Reading" : "Preparing Your Reading…");
+  document.getElementById("dash").classList.toggle("dash-preparing", !ready);
+}
+syncReadyState();
+window.addEventListener("COZ_COMPARE_READING_STATUS", syncReadyState);
+
+/* Other dashboard doors: not built yet. Each fires an event and follows a
+   data-href if one is set later, nothing else. Entitlement check hook for the
+   payment system goes here too, once one exists (never a URL parameter). */
+document.querySelectorAll(".hot[data-dash]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const id = btn.dataset.dash;
+    try { window.dispatchEvent(new CustomEvent("COZ_CDASH_" + id.toUpperCase().replace(/-/g, "_"), { detail: { ascendant: ASC_SIGN } })); } catch (e) {}
+    if (btn.dataset.href) location.href = btn.dataset.href;
+  });
+});
+
+/* ============================================================
+   REVEAL  (tap → lock → play once → curtain → Page 01)
+   ============================================================ */
+const revealEl = document.getElementById("reveal");
+const revealVideo = document.getElementById("revealVideo");
+let revealActive = false, revealDone = false, revealTimers = [];
+/* warm the clip while the dashboard is up so the turn can start the moment it is tapped */
+try { revealVideo.load(); } catch (e) {}
+
+function lockScroll(on) { document.body.classList.toggle("scroll-locked", on); }
+
+function startReveal() {
+  if (revealActive || !readingReady()) return;
+  revealActive = true; revealDone = false;
+  document.getElementById("hotReading").disabled = true;
+  lockScroll(true);
+  try { window.dispatchEvent(new CustomEvent("COZ_COMPARE_REVEAL_START", { detail: { ascendant: ASC_SIGN } })); } catch (e) {}
+
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduced) { finishReveal(true); return; }
+
+  revealEl.classList.remove("is-closing", "asc-off");
+  revealEl.classList.add("is-on");
+  // the clip zooms from its letterboxed first frame to full frame over ~1s; ease the stage back to cover-fit in step
+  document.documentElement.classList.add("reveal-zooming");
+  setTimeout(() => document.documentElement.style.setProperty("--dash-zoom", getComputedStyle(document.documentElement).getPropertyValue("--reveal-zoom").trim() || "1.23"), 120);
+  document.getElementById("revealLive").textContent = "Opening your Combined reading";
+
+  // if the clip cannot even start (no network, blocked), move on rather than trap anyone
+  revealTimers.push(setTimeout(() => { if (!revealStarted) finishReveal(false); }, 7000));
+
+  revealStarted = false;
+  try { revealVideo.currentTime = 0; } catch (e) {}
+  const p = revealVideo.play();
+  if (p && p.catch) p.catch(() => finishReveal(false));
+}
+
+/* timers that depend on the clip actually running start only once it is playing */
+let revealStarted = false;
+revealVideo.addEventListener("playing", () => {
+  if (revealStarted || !revealActive) return;
+  revealStarted = true;
+  // the live ascendant overlay stays while the buttons are still on screen, then lets go before the burst
+  revealTimers.push(setTimeout(() => revealEl.classList.add("asc-off"), 1900));
+  // hard cap a little past the clip's 2.5s so a stalled clip never traps anyone
+  revealTimers.push(setTimeout(() => finishReveal(false), 3600));
+});
+
+function finishReveal(immediate) {
+  if (!revealActive || revealDone) return;   // ignore clip events while the reveal is not running
+  revealDone = true;
+  revealTimers.forEach(clearTimeout); revealTimers = [];
+  const land = () => {
+    location.hash = "#/at-your-core";          // its own history entry; renders via hashchange
+    revealEl.classList.remove("is-on", "is-closing", "asc-off");
+    try { revealVideo.pause(); } catch (e) {}
+    lockScroll(false);
+    revealActive = false;
+    syncReadyState();
+  };
+  if (immediate) { land(); return; }
+  revealEl.classList.add("is-closing");         // everything disappears into navy
+  setTimeout(land, 500);
+}
+
+function cancelReveal() {
+  if (!revealActive || revealDone) return;
+  revealDone = true;
+  revealTimers.forEach(clearTimeout); revealTimers = [];
+  document.documentElement.classList.remove("reveal-zooming");
+  document.documentElement.style.setProperty("--dash-zoom", getComputedStyle(document.documentElement).getPropertyValue("--dash-zoom-in").trim() || "1.5");
+  try { revealVideo.pause(); revealVideo.currentTime = 0; } catch (e) {}
+  revealEl.classList.remove("is-on", "is-closing", "asc-off");
+  lockScroll(false);
+  revealActive = false;
+  syncReadyState();
+}
+
+document.getElementById("hotReading").addEventListener("click", startReveal);
+document.getElementById("revealBack").addEventListener("click", cancelReveal);
+revealVideo.addEventListener("ended", () => finishReveal(false));
+revealVideo.addEventListener("error", () => finishReveal(false));
+
+/* Section links are plain hash links: every section is its own history entry,
+   so the phone's back gesture steps through them, and back past Page 01 lands on the dashboard. */
+window.addEventListener("hashchange", showFromHash);
+showFromHash();
+</script>
+</body>
+</html>
