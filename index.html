@@ -2,10 +2,26 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Your Vedic Reading · CozAlyze</title>
-<style>html,body{margin:0;background:#000f26}</style>
-<script>location.replace("vedic-reading.html?v=" + Date.now() + location.hash);</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CozAlyze · test builds</title>
+<style>
+  html, body { margin: 0; background: #000f26; color: #e5d4c5; font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif; }
+  main { min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 28px; }
+  a { display: block; width: min(100%, 360px); padding: 18px 20px; border: 1px solid rgba(212,161,120,0.65); border-radius: 10px; color: #d4a178; text-decoration: none; font-size: 20px; text-align: center; }
+  p { margin: 0 0 8px; font-size: 13px; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(229,212,197,0.7); }
+</style>
 </head>
-<body></body>
+<body>
+<main>
+  <p>Test builds</p>
+  <a id="v" href="vedic-reading.html">Vedic Reading</a>
+  <a id="t" href="tropical-reading.html">Tropical Reading</a>
+</main>
+<script>
+  // fresh copy every time, so the corner stamp always reflects the latest upload
+  const bust = "?v=" + Date.now();
+  document.getElementById("v").href = "vedic-reading.html" + bust;
+  document.getElementById("t").href = "tropical-reading.html" + bust;
+</script>
+</body>
 </html>
